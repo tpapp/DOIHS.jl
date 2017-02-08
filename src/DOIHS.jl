@@ -1,6 +1,10 @@
 module DOIHS
 
 using ValidatedNumerics
+using FastGaussQuadrature
+using Distributions
+using RecipesBase
+
 import Base: show, size, linspace
 
 export
@@ -10,8 +14,12 @@ export
     collocation_points,
     basis_matrix,
     ChebyshevBasis,
-    IntervalAB
+    IntervalAB,
+    # quadrature
+    Quadrature,
+    quadrature
 
 include("basis.jl")
+include("quadrature.jl")
 
 end # module
