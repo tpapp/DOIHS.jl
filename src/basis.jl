@@ -34,7 +34,14 @@ size(b::ChebyshevBasis) = (b.n,)
 
 domain(b::ChebyshevBasis, T=Float64) = -one(T)..one(T)
 
-collocation_points(b::ChebyshevBasis) = [cos((i-0.5)*pi/b.n) for i in b.n:-1:1]
+function collocation_points(b::ChebyshevBasis, stretch = false)
+    zs = [cos((i-0.5)*pi/b.n) for i in b.n:-1:1]
+    if stretch
+        scale = 1/zs[end]
+        zs .= zs .* scale
+    end
+    zs
+end
 
 function basis_matrix{T}(b::ChebyshevBasis,
                          x::AbstractVector{T}=collocation_points(b))
