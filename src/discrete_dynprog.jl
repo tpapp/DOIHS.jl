@@ -39,7 +39,7 @@ function and the indexes of optimal policies.
 """
 function value_iteration_step(dd::DDproblem, V)
     @unpack β, U, P = dd
-    optimal_Vms = [findmax(@view(U[n, :]) + β*P[n]*V) for n in indices(U, 2)]
+    optimal_Vms = [findmax(@view(U[n, :]) + β*P[n]*V) for n in indices(U, 1)]
     (first.(optimal_Vms), last.(optimal_Vms))
 end
 
