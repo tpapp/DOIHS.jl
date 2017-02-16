@@ -50,7 +50,7 @@ It will be the same type as the elements of `dd.P`, tus
 """
 function transition_matrix(dd::DDproblem, optimal_ms)
     @unpack U, P = dd
-    N = size(U, 2)
+    N = size(U, 1)
     M = zeros(N, N)
     for (n,m) in enumerate(optimal_ms)
         M[n, :] = P[n][m, :]
