@@ -18,6 +18,26 @@ using Base.Test
 
 end
 
+@testset "linear interpolation" begin
+    @test_throws Exception LinearInterpolation([2.0,1.0])
+    li = LinearInterpolation(Float64[1,2,4])
+    @test collocation_points(li) == [1.0,2.0,4.0]
+    @test domain(li) == 1.0..4.0
+    @test degf(li) == 3
+    y = [5.0, 3.0, 7.0]
+    lif = li \ y
+    @test collocation_values(lif) == y
+    @test lif(1.0) == 5.0
+    @test lif(1.5) == 4.0
+    @test lif(1.75) == 3.5
+    @test lif(3.0) == 5.0
+    @test lif(3.5) == 6.0
+    @test lif(3.75) == 6.5
+    @test lif(4.0) == 7.0
+    @test_throws Exception lif(-1.0)
+    @test_throws Exception lif(5.0)
+end
+
 @testset "quadrature" begin
 
     d = Truncated(Normal(0,1), -1, 2)

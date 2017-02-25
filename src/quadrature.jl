@@ -1,3 +1,8 @@
+export
+    Quadrature,
+    quadrature
+
+
 """
 Lightweight wrapper for the nodes and weights of a quadrature. Also
 include the domain.

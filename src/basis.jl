@@ -1,4 +1,20 @@
+######################################################################
 # general interface
+######################################################################
+
+export
+    # general interface
+    AbstractBasis,
+    domain,
+    collocation_points,
+    degf,
+    basis_matrix,
+    InterpolatedFunction,
+    collocation_values,
+    # bases
+    ChebyshevBasis,
+    IntervalAB,
+    LinearInterpolation
 
 abstract AbstractBasis
 
@@ -7,8 +23,9 @@ Return the domain of the basis.
 """
 function domain end
 
-function linspace(b::AbstractBasis, len)
-    dom = domain(b)
+"A range of `n` linearly spaced elements in the domain of `basis`."
+function linspace(basis::AbstractBasis, len)
+    dom = domain(basis)
     linspace(dom.lo, dom.hi, len)
 end
 
@@ -18,13 +35,71 @@ Return the collocation points (if any) for a basis.
 function collocation_points end
 
 """
+Degress of freedom (number of coefficients).
+"""
+degf(basis::AbstractBasis) = length(collocation_points(basis))
+
+"""
 Return the basis matrix, ie the functions in the basis evaluated at
 the given points, one row for each point. Points default to
 `collocation_points`.
 """
 function basis_matrix end
 
+"""
+Interpolated function using `basis`, with coefficients `α`.
+"""
+immutable InterpolatedFunction{S, T}
+    basis::S
+    α::T
+end
+
+@forward InterpolatedFunction.basis domain, collocation_points
+
+"""
+Evaluate the approximation on `basis` with coefficients `α` at at `x`.
+
+Notes:
+1. methods should be defined for various bases.
+2. the callable interface is recommended for use outside this module.
+"""
+function _evaluate(basis, α, x)
+    first(basis_matrix(basis, [x]) * α)
+end
+
+(f::InterpolatedFunction)(x) = _evaluate(f.basis, f.α, x)
+
+"""
+Evaluate the interpolated function at the collocation points.
+"""
+function collocation_values(ipf::InterpolatedFunction)
+    ipf.(collocation_points(ipf.basis))
+end
+
+"""
+Interpolate points in `y`, assumed to be values at the collocation
+points, using `basis`.
+"""
+function \(basis::AbstractBasis, y::AbstractVector)
+    # NOTE: this is just a fallback method, not necessarily efficient.
+    @assert degf(basis) == length(y)
+    InterpolatedFunction(basis, basis_matrix(basis) \ y)
+end
+
+"""
+Interpolate `f`, evaluated at the collocation points, using `basis`.
+"""
+function \(basis::AbstractBasis, f)
+    basis \ f.(collocation_points(basis))
+end
+
+zeros(basis::AbstractBasis) = basis \ zeros(degf(basis))
+
+ones(basis::AbstractBasis) = basis \ ones(degf(basis))
+          
+######################################################################
 # Chebyshev basis on [-1,1]
+######################################################################
 
 immutable ChebyshevBasis <: AbstractBasis
     n::Int
@@ -95,4 +170,45 @@ function show(io::IO, b::IntervalAB)
     print(io, b.inner_basis)
     print(io, " on ")
     print(io, b.domain)
+end
+
+######################################################################
+# linear interpolation
+######################################################################
+immutable LinearInterpolation{T <: AbstractVector} <: AbstractBasis
+    nodes::T
+    function LinearInterpolation(nodes)
+        @assert issorted(nodes) "Nodes need to be sorted"
+        new(nodes)
+    end
+end
+
+LinearInterpolation{T}(nodes::T) = LinearInterpolation{T}(nodes)
+
+collocation_points(li::LinearInterpolation) = li.nodes
+
+domain(li::LinearInterpolation) = li.nodes[1]..li.nodes[end]
+
+basis_matrix(li::LinearInterpolation) = speye(length(li.nodes))
+
+function \(li::LinearInterpolation, y::AbstractVector)
+    @assert degf(li) == length(y)
+    InterpolatedFunction(li, y)
+end
+
+function _evaluate(li::LinearInterpolation, α, x)
+    @unpack nodes = li
+    (nodes[1] ≤ x ≤ nodes[end]) || error(DomainError())
+    index = searchsortedlast(nodes, x)
+    @assert index ≠ 0 "internal error"
+    if x == nodes[index]
+        α[index]
+    else
+        p = (x - nodes[index]) / (nodes[index+1] - nodes[index])
+        α[index]*(1-p) + α[index+1]*p
+    end
+end
+
+function collocation_values{S <: LinearInterpolation, T}(ipf::InterpolatedFunction{S,T})
+    ipf.α
 end

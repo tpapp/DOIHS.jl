@@ -1,3 +1,13 @@
+export
+    DDproblem,
+    value_iteration_step,
+    transition_matrix,
+    policy_iteration_step,
+    DDsolution,
+    solve_iteratively,
+    simulate_transitions
+
+
 # discrete state, discrete time dynamic programming
 
 """
