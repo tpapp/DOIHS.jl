@@ -6,7 +6,8 @@ export
     DPSolution,
     value_iteration,
     value_residual,
-    nonlinear_solve
+    solve_residual,
+    nonlinear_solve_value
 
 """
 Object characterizing the optimal solution (a value and a policy) to
@@ -85,17 +86,18 @@ end
 
 """
 Calculate the residual between the right- and left-hand sides of a
-Bellman equation at the given states. Return a vector of residuals.
+Bellman equation at the given state.
 """
-function value_residual(model, value, states)
-    [optimize_rhs(model, value, state).value - value(state)
-     for state in states]
+function value_residual(model, value, state)
+    optimize_rhs(model, value, state).value - value(state)
 end
 
-function value_residual(solution::DPSolution, states)
+function value_residual(solution::DPSolution, state)
     @unpack model, value = solution
-    value_residual(model, value, states)
+    value_residual(model, value, state)
 end
+
+using DebuggingUtilities
 
 """
 Solve for `residual(f) = 0` in a linearly interpolated space of
@@ -117,22 +119,19 @@ function solve_residual(model,
     @unpack basis, α = initial_f
     states = collocation_points(basis)
     function f!(α, residual)
-        residual .= [residual_function(model, basis * α, state)
-                     for state in states]
+        f = basis * α
+        residual .= [residual_function(model, f, state) for state in states]
     end
     result = nlsolve(f!, α, nlsolve_options...)
     basis * result.zero, result
 end
 
-
 function nonlinear_solve_value(solution::DPSolution)
-    @unpack model, value = solution
-    _value, root = solve_residual(model, value_residual, solution.value)
-    _policy = basis \ [policy(optimize_rhs(model, _value, state))
-                      for state in states]
-    DPSolution(model = model,
-               value = _value,
-               policy = _policy,
+    value, root = solve_residual(solution.model, value_residual, solution.value)
+    policy(state) = optimize_rhs(solution.model, value, state).policy
+    DPSolution(model = solution.model,
+               value = value,
+               policy = value.basis \ policy,
                iterations = root.iterations,
                converged = NLsolve.converged(root))
 end
