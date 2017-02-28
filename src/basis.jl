@@ -54,7 +54,13 @@ immutable InterpolatedFunction{S, T}
     α::T
 end
 
+*(basis::AbstractBasis, α) = InterpolatedFunction(basis, α)
+
 @forward InterpolatedFunction.basis domain, collocation_points
+
+function show(io::IO, ipf::InterpolatedFunction)
+    print(io, "Interpolated function on ", ipf.basis)
+end
 
 """
 Evaluate the approximation on `basis` with coefficients `α` at at `x`.
@@ -97,21 +103,40 @@ zeros(basis::AbstractBasis) = basis \ zeros(degf(basis))
 
 ones(basis::AbstractBasis) = basis \ ones(degf(basis))
           
+# plot recipe for displaying interpolated functions
+@recipe function f(ipf::InterpolatedFunction, label = "function", N = 100)
+    @unpack basis, α = ipf
+    dom = domain(basis)
+    z = collect(linspace(dom.lo, dom.hi, N))
+    @series begin
+        seriestype := :path
+        label := label
+        z, ipf.(z)
+    end
+    @series begin
+        primary := false
+        seriestype := :scatter
+        collocation_points(ipf), collocation_values(ipf)
+    end
+end
+
 ######################################################################
 # Chebyshev basis on [-1,1]
 ######################################################################
 
 immutable ChebyshevBasis <: AbstractBasis
     n::Int
+    stretch::Bool
+    ChebyshevBasis(n; stretch=false) = new(n, stretch)
 end
 
 size(b::ChebyshevBasis) = (b.n,)
 
 domain(b::ChebyshevBasis, T=Float64) = -one(T)..one(T)
 
-function collocation_points(b::ChebyshevBasis, stretch = false)
+function collocation_points(b::ChebyshevBasis)
     zs = [cos((i-0.5)*pi/b.n) for i in b.n:-1:1]
-    if stretch
+    if b.stretch
         scale = 1/zs[end]
         zs .= zs .* scale
     end
@@ -201,6 +226,7 @@ function _evaluate(li::LinearInterpolation, α, x)
     (nodes[1] ≤ x ≤ nodes[end]) || error(DomainError())
     index = searchsortedlast(nodes, x)
     @assert index ≠ 0 "internal error"
+    # println("index = $index, node = $(nodes[index])")
     if x == nodes[index]
         α[index]
     else
