@@ -38,6 +38,20 @@ end
     @test_throws Exception lif(5.0)
 end
 
+@testset "extrapolate level" begin
+    inner_basis = IntervalAB(1..10, ChebyshevBasis(3))
+    basis = ExtrapolateLevel(inner_basis)
+    @test collocation_points(inner_basis) == collocation_points(basis)
+    @test degf(inner_basis) == degf(basis)
+    y = [2.0, 3.0, 7.0]
+    ipf = basis \ y
+    @test collocation_values(ipf) ≈ y
+    a = ipf(1)
+    b = ipf(10)
+    @test ipf(-1) ≈ a
+    @test ipf(11) ≈ b
+end
+    
 @testset "quadrature" begin
 
     d = Truncated(Normal(0,1), -1, 2)

@@ -14,7 +14,8 @@ export
     # bases
     ChebyshevBasis,
     IntervalAB,
-    LinearInterpolation
+    LinearInterpolation,
+    ExtrapolateLevel
 
 abstract AbstractBasis
 
@@ -153,7 +154,9 @@ function basis_matrix{T}(b::ChebyshevBasis,
     A
 end
 
+######################################################################
 # IntervalAB
+######################################################################
 
 """
 Transform an inner basis to an interval.
@@ -200,6 +203,7 @@ end
 ######################################################################
 # linear interpolation
 ######################################################################
+
 immutable LinearInterpolation{T <: AbstractVector} <: AbstractBasis
     nodes::T
     function LinearInterpolation(nodes)
@@ -237,4 +241,20 @@ end
 
 function collocation_values{S <: LinearInterpolation, T}(ipf::InterpolatedFunction{S,T})
     ipf.α
+end
+
+######################################################################
+# ExtrapolateLevel
+######################################################################
+
+immutable ExtrapolateLevel{T} <: AbstractBasis
+    inner_basis::T
+end
+
+@forward ExtrapolateLevel.inner_basis domain, collocation_points, basis_matrix, degf
+
+function _evaluate(basis::ExtrapolateLevel, α, x)
+    @unpack inner_basis = basis
+    dom = domain(inner_basis)
+    _evaluate(inner_basis, α, clamp(x, dom.lo, dom.hi))
 end
