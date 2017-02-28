@@ -57,7 +57,7 @@ end
 
 *(basis::AbstractBasis, α) = InterpolatedFunction(basis, α)
 
-@forward InterpolatedFunction.basis domain, collocation_points
+@forward InterpolatedFunction.basis domain, collocation_points, degf
 
 function show(io::IO, ipf::InterpolatedFunction)
     print(io, "Interpolated function on ", ipf.basis)
