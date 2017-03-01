@@ -97,8 +97,6 @@ function value_residual(solution::DPSolution, state)
     value_residual(model, value, state)
 end
 
-using DebuggingUtilities
-
 """
 Solve for `residual(f) = 0` in a linearly interpolated space of
 functions.
