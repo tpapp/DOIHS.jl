@@ -46,10 +46,10 @@ end
     y = [2.0, 3.0, 7.0]
     ipf = basis \ y
     @test collocation_values(ipf) ≈ y
-    a = ipf(1)
-    b = ipf(10)
-    @test ipf(-1) ≈ a
-    @test ipf(11) ≈ b
+    a = ipf(1.0)
+    b = ipf(10.0)
+    @test ipf(-1.0) ≈ a
+    @test ipf(11.0) ≈ b
 end
     
 @testset "quadrature" begin
