@@ -11,6 +11,7 @@ using NLsolve
 
 import Base: show, size, linspace, \, *, zeros, ones
 
+include("misc.jl")
 include("basis.jl")
 include("quadrature.jl")
 include("iteration.jl")

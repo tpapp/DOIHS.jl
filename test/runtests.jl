@@ -3,6 +3,27 @@ using ValidatedNumerics
 using Distributions
 using Base.Test
 
+@testset "" begin
+
+    @test_throws DomainError crra_utility_function(0.1)
+    @test_throws DomainError crra_utility(0.1, 0.1)
+    @test_throws DomainError crra_utility(-1, 1)
+    @test crra_utility(0, 1) ≡ -∞
+
+    u = crra_utility_function(1)
+    @test_throws DomainError u(-10)
+    @test u(0) ≡ -∞
+    @test u(1) == 0.0
+    @test isa(u(1), Float64)
+
+    u = crra_utility_function(2)
+    @test_throws DomainError u(-10)
+    @test u(0.0) ≡ -∞
+    @test u(1) == 0.0
+    @test isa(u(1), Float64)
+    
+end
+
 @testset "function approximation" begin
     
     function approxerror(basis, f, n=100)
