@@ -112,7 +112,7 @@ nonlinear solver is used to find `f`.
 """
 function solve_residual(model,
                         residual_function,
-                        initial_f,
+                        initial_f;
                         nlsolve_options...)
     @unpack basis, α = initial_f
     states = collocation_points(basis)
@@ -120,12 +120,13 @@ function solve_residual(model,
         f = basis * α
         residual .= [residual_function(model, f, state) for state in states]
     end
-    result = nlsolve(f!, α, nlsolve_options...)
+    result = nlsolve(f!, α; nlsolve_options...)
     basis * result.zero, result
 end
 
-function nonlinear_solve_value(solution::DPSolution)
-    value, root = solve_residual(solution.model, value_residual, solution.value)
+function nonlinear_solve_value(solution::DPSolution; nlsolve_options...)
+    value, root = solve_residual(solution.model, value_residual,
+                                 solution.value; nlsolve_options...)
     policy(state) = optimize_rhs(solution.model, value, state).policy
     DPSolution(model = solution.model,
                value = value,
