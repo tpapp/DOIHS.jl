@@ -3,7 +3,7 @@ using ValidatedNumerics
 using Distributions
 using Base.Test
 
-@testset "" begin
+@testset "CRRA utility" begin
 
     @test_throws DomainError crra_utility_function(0.1)
     @test_throws DomainError crra_utility(0.1, 0.1)
@@ -21,20 +21,22 @@ using Base.Test
     @test u(0.0) ≡ -∞
     @test u(1) == 0.0
     @test isa(u(1), Float64)
-    
+
+    @test_throws DomainError crra_u′(-0.1, 0.1)
+    @test crra_u′(2, 1) == 1/2
 end
 
 @testset "function approximation" begin
-    
+
     function approxerror(basis, f, n=100)
         α = basis_matrix(basis) \ f(collocation_points(basis))
         x = linspace(basis, n)
         y = basis_matrix(basis, x) * α
         maximum(abs(y-f(x)) for (x,y) in zip(x,y))
     end
-    
+
     @test approxerror(ChebyshevBasis(10), exp) ≤ 1e-9
-    
+
     @test approxerror(IntervalAB(0..pi, ChebyshevBasis(10)), sin) ≤ 1e-7
 
 end
@@ -72,7 +74,7 @@ end
     @test ipf(-1.0) ≈ a
     @test ipf(11.0) ≈ b
 end
-    
+
 @testset "quadrature" begin
 
     d = Truncated(Normal(0,1), -1, 2)
