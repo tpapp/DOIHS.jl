@@ -38,7 +38,7 @@ function quadrature(n::Int, distribution::Distribution{Univariate,Continuous},
     @assert isfinite(domain)
     a, b = domain.lo, domain.hi
     y_nodes, weights = gausslegendre(n)
-    x_nodes = muladd.(y_nodes, (b-a)/2, middle(a,b))
+    x_nodes = fma.(y_nodes, (b-a)/2, middle(a,b))
     Quadrature(domain, x_nodes, # FIXME: remove [] around distribution in 0.6
                normalize!(pdf.([distribution], x_nodes) .* weights, 1))
 end

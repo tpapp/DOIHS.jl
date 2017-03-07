@@ -103,7 +103,7 @@ end
 zeros(basis::AbstractBasis) = basis \ zeros(degf(basis))
 
 ones(basis::AbstractBasis) = basis \ ones(degf(basis))
-          
+
 # plot recipe for displaying interpolated functions
 @recipe function f(ipf::InterpolatedFunction, label = "function", N = 100)
     @unpack basis, α = ipf
@@ -161,7 +161,7 @@ end
 """
 Transform an inner basis to an interval.
 
-Transforming to the inner basis is with `x ↦ muladd(scale, shift)`.
+Transforming to the inner basis is with `x ↦ fma(scale, shift)`.
 """
 immutable IntervalAB{T,S <: AbstractBasis} <: AbstractBasis
     domain::Interval{T}
@@ -180,9 +180,9 @@ function IntervalAB{T,S}(domain::Interval{T}, inner_basis::S)
     IntervalAB{T,S}(domain, inner_basis)
 end
 
-_map_to_inner(b::IntervalAB, x) = muladd.(x, b.scale, b.shift)
+_map_to_inner(b::IntervalAB, x) = fma.(x, b.scale, b.shift)
 
-_map_from_inner(b::IntervalAB, x) = muladd.(x, 1/b.scale, -b.shift/b.scale)
+_map_from_inner(b::IntervalAB, x) = fma.(x, 1/b.scale, -b.shift/b.scale)
 
 domain(b::IntervalAB) = b.domain
 
