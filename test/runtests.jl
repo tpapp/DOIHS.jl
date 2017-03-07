@@ -24,6 +24,8 @@ using Base.Test
 
     @test_throws DomainError crra_u′(-0.1, 0.1)
     @test crra_u′(2, 1) == 1/2
+
+    @test crra_inv_u′(crra_u′(9.0, 3.0), 3.0) ≈ 9.0
 end
 
 @testset "function approximation" begin

@@ -1,4 +1,4 @@
-export crra_utility, crra_utility_function, crra_u′
+export crra_utility, crra_utility_function, crra_u′, crra_inv_u′
 
 """
 CRRA utility function for consumption `c`, with relative risk aversion
@@ -39,3 +39,12 @@ function crra_u′(c::AbstractFloat, σ)
 end
 
 crra_u′(c, σ) = crra_u′(convert(AbstractFloat, c), σ)
+
+"""
+Inverse of marginal CRRA utility.
+"""
+function crra_inv_u′(u′::AbstractFloat, σ)
+    u′ < zero(u′) ? throw(DomainError()) : u′^(-1/σ)
+end
+
+crra_inv_u′(u′, σ) = crra_inv_u′(convert(AbstractFloat, u′), σ)
