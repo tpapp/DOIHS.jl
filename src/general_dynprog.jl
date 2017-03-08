@@ -8,6 +8,7 @@ export
     value_residual,
     solve_residual,
     nonlinear_solve_value
+    bellman_residual_plot
 
 """
 Object characterizing the optimal solution (a value and a policy) to
@@ -133,4 +134,17 @@ function nonlinear_solve_value(solution::DPSolution; nlsolve_options...)
                policy = value.basis \ policy,
                iterations = root.iterations,
                converged = NLsolve.converged(root))
+end
+
+"""
+Plot the residual of the Bellman equation of `solution`, using `N`
+points, for a univariate solution. `statename` labels the x axis.
+"""
+function bellman_residual_plot(solution; statename="state", N=100)
+    basis = solution.value.basis
+    dense_z = linspace(basis, N)
+    residual = [value_residual(solution, z) for z in dense_z]
+    plot(dense_z, residual, xlab=statename, ylab="residual of Bellman equation",
+         legend = false)
+    scatter!(collocation_points(basis), zeros(degf(basis)))
 end

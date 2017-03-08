@@ -8,6 +8,7 @@ using Parameters
 using Distributions
 using Lazy
 using NLsolve
+using Plots
 
 import Base: show, size, linspace, \, *, zeros, ones
 
