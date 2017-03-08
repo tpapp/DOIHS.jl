@@ -128,7 +128,10 @@ end
 immutable ChebyshevBasis <: AbstractBasis
     n::Int
     stretch::Bool
-    ChebyshevBasis(n; stretch=false) = new(n, stretch)
+    extrapolate::Bool
+    function ChebyshevBasis(n; stretch=false, extrapolate=false)
+        new(n, stretch, extrapolate)
+    end
 end
 
 size(b::ChebyshevBasis) = (b.n,)
@@ -146,7 +149,9 @@ end
 
 function basis_matrix{T}(b::ChebyshevBasis,
                          x::AbstractVector{T}=collocation_points(b))
-    @assert all(abs(x) ≤ one(T) for x in x)
+    if !b.extrapolate
+        @assert all(abs(x) ≤ one(T) for x in x)
+    end
     A = Array{T}(length(x), b.n)
     for i in 1:b.n
         A[:,i] .= i == 1 ? one(T) : i == 2 ? x : (2.*x.*A[:, i-1]-A[:, i-2])

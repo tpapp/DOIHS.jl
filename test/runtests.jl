@@ -43,6 +43,14 @@ end
 
 end
 
+@testset "Chebyshev extrapolation" begin
+    basis = IntervalAB(0..10, ChebyshevBasis(10; extrapolate = true))
+    f(x) = x^2 - 5*x + 6
+    g = basis \ f
+    @test g(11) ≈ f(11)
+    @test g(-1) ≈ f(-1)
+end
+
 @testset "linear interpolation" begin
     @test_throws Exception LinearInterpolation([2.0,1.0])
     li = LinearInterpolation(Float64[1,2,4])

@@ -1,13 +1,11 @@
 export
     OptimalRHS,
-    value,
-    policy,
     optimize_rhs,
     DPSolution,
     value_iteration,
     value_residual,
     solve_residual,
-    nonlinear_solve_value
+    nonlinear_solve_value,
     bellman_residual_plot
 
 """
