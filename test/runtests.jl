@@ -94,3 +94,16 @@ end
     @test isapprox(q(x->(x-m)^2), var(d); rtol=1e-6)
 
 end
+
+@testset "quadrature normal" begin
+
+    μ = 1.0
+    σ = 2.0
+    q = quadrature_normal(10, μ, σ)
+
+    n = Normal(μ,σ)
+
+    @test mean(n) ≈ q(identity)
+    @test var(n) ≈ q(x->(x-μ)^2)
+
+end

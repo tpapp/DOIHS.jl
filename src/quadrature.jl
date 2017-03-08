@@ -1,6 +1,7 @@
 export
     Quadrature,
-    quadrature
+    quadrature,
+    quadrature_normal
 
 
 """
@@ -17,6 +18,9 @@ function Base.show(io::IO, q::Quadrature)
     print(io, "Quadrature of $(length(q.nodes)) points on $(q.domain)")
 end
 
+"""
+Integrate a univariate function using the quadrature.
+"""
 function (q::Quadrature)(f)
     sum(weight*f(node) for (node, weight) in zip(q.nodes, q.weights))
 end
@@ -45,4 +49,13 @@ end
 
 function quadrature{T <: Distribution{Univariate,Continuous}}(n::Int, d::Truncated{T,Continuous})
     quadrature(n, d.untruncated, d.lower..d.upper)
+end
+
+"""
+Return a quadrature that integrates a function under the `Normal(μ,σ)`
+distribution using `N` nodes.
+"""
+function quadrature_normal(N::Int, μ, σ)
+    nodes, weights = gausshermite(N)
+    Quadrature(-Inf..Inf, nodes*√2*σ + μ, weights/√π)
 end
