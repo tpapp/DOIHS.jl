@@ -150,7 +150,7 @@ end
 function basis_matrix{T}(b::ChebyshevBasis,
                          x::AbstractVector{T}=collocation_points(b))
     if !b.extrapolate
-        @assert all(abs(x) ≤ one(T) for x in x)
+        @assert all(abs(x) ≤ one(T) + √eps(T) for x in x)
     end
     A = Array{T}(length(x), b.n)
     for i in 1:b.n
