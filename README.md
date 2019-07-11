@@ -7,4 +7,4 @@
 
 Package for some routines and examples used in the Dynamic Optimization 2 course at the Institute for Advanced Studies, Vienna, in 2017 spring.
 
-The code is mostly pedagogical, and not optimized for either speed, allocation, or even numerical accuracy. This package is abandonned, useful parts are being reorganized into other libraries of mine.
+The code is mostly pedagogical, and not optimized for either speed, allocation, or even numerical accuracy. This package is abandoned, useful parts are being reorganized into other libraries of mine.
